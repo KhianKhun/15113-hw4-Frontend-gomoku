@@ -2,7 +2,7 @@ const BOARD_SIZE = 15;
 
 // IMPORTANT: Replace with your Render URL after deployment
 // Example: https://your-backend.onrender.com
-const BACKEND_URL = "https://one5113-hw4-backend-gomoku.onrender.com"; // switch to Render URL for GitHub Pages
+const BACKEND_URL = "https://one5113-hw4-backend-gomoku.onrender.com";
 
 let board = null;
 let locked = false;
@@ -11,6 +11,7 @@ let gameOver = false;
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("statusText");
 const newGameBtn = document.getElementById("newGameBtn");
+
 const footEl = document.querySelector(".foot");
 const aiWarningEl = document.createElement("small");
 aiWarningEl.id = "aiWarningText";
@@ -58,7 +59,6 @@ function render() {
         const stone = document.createElement("div");
         stone.className = "stone " + (val === 1 ? "black" : "white");
         cell.appendChild(stone);
-        cell.style.cursor = "default";
       }
 
       cell.addEventListener("click", onCellClick);
@@ -91,7 +91,8 @@ async function newGame() {
     setLocked(true);
     gameOver = false;
     setAiWarning("");
-    setStatus("Starting game…");
+    setStatus("Starting game...");
+
     const data = await apiPost("/start", {});
     board = data.board;
     gameOver = isGameOverStatus(data.status);
@@ -115,11 +116,21 @@ async function onCellClick(e) {
 
   if (board[r][c] !== 0) return;
 
+  let boardBeforeMove = null;
   try {
     setLocked(true);
-    setStatus("AI thinking…");
+    setAiWarning("");
 
-    const data = await apiPost("/move", { board, row: r, col: c });
+    // Show player's move immediately.
+    boardBeforeMove = board.map((row) => row.slice());
+    board[r][c] = 1;
+    render();
+
+    setStatus("AI thinking...");
+
+    // Send the pre-move board to backend; backend applies player move + AI move.
+    const data = await apiPost("/move", { board: boardBeforeMove, row: r, col: c });
+
     board = data.board;
     gameOver = isGameOverStatus(data.status);
     setAiWarning(data.ai_warning || "");
@@ -136,8 +147,12 @@ async function onCellClick(e) {
     } else {
       setStatus(data.message || "Done.");
     }
-
   } catch (e2) {
+    // Roll back optimistic move when request fails.
+    if (boardBeforeMove) {
+      board = boardBeforeMove;
+      render();
+    }
     setStatus(`Error: ${e2.message}`);
   } finally {
     setLocked(false);
