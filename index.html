@@ -1,0 +1,36 @@
+
+## `index.html`
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gomoku (Five in a Row)</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <h1>Gomoku (五子棋)</h1>
+      <div class="controls">
+        <button id="newGameBtn">New Game</button>
+        <span id="statusText">Loading…</span>
+      </div>
+      <p class="hint">
+        You are <b>black</b>. Click an empty cell to place a stone.
+      </p>
+    </header>
+
+    <section>
+      <div id="board" class="board" aria-label="Gomoku board"></div>
+    </section>
+
+    <footer class="foot">
+      <small>Backend: Render + Flask. Frontend: GitHub Pages.</small>
+    </footer>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
