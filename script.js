@@ -6,6 +6,7 @@ const BACKEND_URL = "http://127.0.0.1:5000"; // switch to Render URL for GitHub 
 
 let board = null;
 let locked = false;
+let gameOver = false;
 
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("statusText");
@@ -20,20 +21,26 @@ function setLocked(v) {
   newGameBtn.disabled = v;
 }
 
+function isGameOverStatus(status) {
+  return status === "player_win" || status === "ai_win" || status === "draw";
+}
+
 function render() {
   boardEl.innerHTML = "";
+  boardEl.classList.toggle("game-over", gameOver);
 
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       const cell = document.createElement("div");
       cell.className = "cell";
-      cell.tabIndex = 0;
+      cell.tabIndex = gameOver ? -1 : 0;
 
       cell.dataset.row = String(r);
       cell.dataset.col = String(c);
 
       const val = board[r][c];
       if (val === 1 || val === 2) {
+        cell.classList.add("occupied");
         const stone = document.createElement("div");
         stone.className = "stone " + (val === 1 ? "black" : "white");
         cell.appendChild(stone);
@@ -68,9 +75,11 @@ async function apiPost(path, payload) {
 async function newGame() {
   try {
     setLocked(true);
+    gameOver = false;
     setStatus("Starting game…");
     const data = await apiPost("/start", {});
     board = data.board;
+    gameOver = isGameOverStatus(data.status);
     render();
     setStatus(data.message || "Your turn.");
   } catch (e) {
@@ -82,6 +91,7 @@ async function newGame() {
 
 async function onCellClick(e) {
   if (locked) return;
+  if (gameOver) return;
   if (!board) return;
 
   const cell = e.currentTarget;
@@ -96,6 +106,7 @@ async function onCellClick(e) {
 
     const data = await apiPost("/move", { board, row: r, col: c });
     board = data.board;
+    gameOver = isGameOverStatus(data.status);
     render();
 
     if (data.status === "ongoing") {

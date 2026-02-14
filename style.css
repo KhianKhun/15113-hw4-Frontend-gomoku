@@ -1,7 +1,9 @@
 
 :root {
+  --board-size: 15;
   --cell: 34px;
-  --gap: 1px;
+  --line-color: rgba(60, 35, 12, 0.75);
+  --line-width: 1px;
 }
 
 body {
@@ -39,36 +41,88 @@ body {
 }
 
 .board {
+  --half-cell: calc(var(--cell) / 2);
+  position: relative;
   display: grid;
-  grid-template-columns: repeat(15, var(--cell));
-  grid-template-rows: repeat(15, var(--cell));
-  gap: var(--gap);
+  grid-template-columns: repeat(var(--board-size), var(--cell));
+  grid-template-rows: repeat(var(--board-size), var(--cell));
   background: #caa56a;
-  padding: 10px;
+  padding: 0;
   border-radius: 10px;
   width: max-content;
   user-select: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.board::before {
+  content: "";
+  position: absolute;
+  top: var(--half-cell);
+  right: var(--half-cell);
+  bottom: var(--half-cell);
+  left: var(--half-cell);
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      var(--line-color) 0 var(--line-width),
+      transparent var(--line-width) var(--cell)
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      var(--line-color) 0 var(--line-width),
+      transparent var(--line-width) var(--cell)
+    );
+  border-right: var(--line-width) solid var(--line-color);
+  border-bottom: var(--line-width) solid var(--line-color);
+  pointer-events: none;
 }
 
 .cell {
   width: var(--cell);
   height: var(--cell);
-  background: rgba(255, 255, 255, 0.25);
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
   cursor: pointer;
 }
 
+.cell::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+
+.cell:not(.occupied):hover::after {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.cell.occupied {
+  cursor: default;
+}
+
+.board.game-over .cell {
+  cursor: default;
+}
+
+.board.game-over .cell:not(.occupied):hover::after {
+  background: transparent;
+}
+
 .cell:focus {
   outline: 2px solid #333;
-  outline-offset: 1px;
+  outline-offset: -4px;
 }
 
 .stone {
-  width: 24px;
-  height: 24px;
+  width: calc(var(--cell) * 0.7);
+  height: calc(var(--cell) * 0.7);
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 2;
 }
 
 .stone.black {
