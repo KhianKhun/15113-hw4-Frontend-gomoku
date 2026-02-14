@@ -11,6 +11,14 @@ let gameOver = false;
 const boardEl = document.getElementById("board");
 const statusEl = document.getElementById("statusText");
 const newGameBtn = document.getElementById("newGameBtn");
+const footEl = document.querySelector(".foot");
+const aiWarningEl = document.createElement("small");
+aiWarningEl.id = "aiWarningText";
+aiWarningEl.className = "ai-warning";
+aiWarningEl.hidden = true;
+if (footEl) {
+  footEl.appendChild(aiWarningEl);
+}
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -23,6 +31,12 @@ function setLocked(v) {
 
 function isGameOverStatus(status) {
   return status === "player_win" || status === "ai_win" || status === "draw";
+}
+
+function setAiWarning(text) {
+  const msg = (text || "").trim();
+  aiWarningEl.textContent = msg;
+  aiWarningEl.hidden = msg.length === 0;
 }
 
 function render() {
@@ -76,6 +90,7 @@ async function newGame() {
   try {
     setLocked(true);
     gameOver = false;
+    setAiWarning("");
     setStatus("Starting game…");
     const data = await apiPost("/start", {});
     board = data.board;
@@ -107,6 +122,7 @@ async function onCellClick(e) {
     const data = await apiPost("/move", { board, row: r, col: c });
     board = data.board;
     gameOver = isGameOverStatus(data.status);
+    setAiWarning(data.ai_warning || "");
     render();
 
     if (data.status === "ongoing") {
