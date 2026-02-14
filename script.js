@@ -2,7 +2,7 @@ const BOARD_SIZE = 15;
 
 // IMPORTANT: Replace with your Render URL after deployment
 // Example: https://your-backend.onrender.com
-const BACKEND_URL = "http://127.0.0.1:5000"; // switch to Render URL for GitHub Pages
+const BACKEND_URL = "https://one5113-hw4-backend-gomoku.onrender.com"; // switch to Render URL for GitHub Pages
 
 let board = null;
 let locked = false;
